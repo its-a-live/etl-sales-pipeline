@@ -1,23 +1,31 @@
+import os
 import time
 import requests
 import json
 import pandas as pd
 
+from dotenv import load_dotenv
+from os.path import join, dirname
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 http_conn_id = HttpHook.get_connection('http_conn_id')
 postgres_conn_id = 'postgresql'
 
 api_key = http_conn_id.extra_dejson.get('api_key')
 base_url = http_conn_id.host
+s3_hook = S3Hook(aws_conn_id='s3_connection')
 
-nickname = "sudodebug"
+nickname = os.environ.get("NICKNAME")
+s3_url = os.environ.get("NICKNAME")
+
 
 headers = {
     'X-Nickname': nickname,
@@ -80,7 +88,7 @@ def get_increment(date, ti):
 
 def upload_data_to_staging(filename, date, pg_table, pg_schema, ti):
     increment_id = ti.xcom_pull(key='increment_id')
-    s3_filename = f'https://storage.net/s3//{nickname}/project/{increment_id}/{filename}'
+    s3_filename = f'{s3_url}/{nickname}/project/{increment_id}/{filename}'
     print(s3_filename)
     local_filename = date.replace('-', '') + '_' + filename
     print(local_filename)
