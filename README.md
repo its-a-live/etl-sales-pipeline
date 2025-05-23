@@ -32,4 +32,5 @@
 │   ├── mart.f_sales.sql    # Витрина продаж
 │   └── mart.f_customer_retention.sql # Витрина удержания
 ├── README.md               # Документация
-└── requirements.txt        # Зависимости Python```
+└── requirements.txt        # Зависимости Python
+```
